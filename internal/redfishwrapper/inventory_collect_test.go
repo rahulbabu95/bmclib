@@ -5,16 +5,15 @@ import (
 	"testing"
 
 	"github.com/bmc-toolbox/common"
-	common2 "github.com/stmcginnis/gofish/common"
-	redfish "github.com/stmcginnis/gofish/redfish"
+	common2 "github.com/stmcginnis/gofish/schemas"
 )
 
 func TestInventoryCollectNetworkPortInfo(t *testing.T) {
-	testAdapter := &redfish.NetworkAdapter{
+	testAdapter := &common2.NetworkAdapter{
 		Manufacturer: "Acme",
 		Model:        "Anvil 3000",
 	}
-	testNetworkPort := &redfish.NetworkPort{
+	testNetworkPort := &common2.NetworkPort{
 		Entity:                     common2.Entity{ID: "NetworkPort-1"},
 		Description:                "NetworkPort One",
 		VendorID:                   "Vendor-ID",
@@ -67,8 +66,8 @@ func TestInventoryCollectNetworkPortInfo(t *testing.T) {
 	tests := []struct {
 		name          string
 		nicPort       *common.NICPort
-		adapter       *redfish.NetworkAdapter
-		networkPort   *redfish.NetworkPort
+		adapter       *common2.NetworkAdapter
+		networkPort   *common2.NetworkPort
 		firmware      string
 		wantedNicPort *common.NICPort
 	}{
@@ -104,7 +103,7 @@ func TestInventoryCollectNetworkPortInfo(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			c := Client{}
-			c.collectNetworkPortInfo(tt.nicPort, tt.adapter, tt.networkPort, tt.firmware, []*redfish.SoftwareInventory{})
+			c.collectNetworkPortInfo(tt.nicPort, tt.adapter, tt.networkPort, tt.firmware, []*common2.SoftwareInventory{})
 			if !reflect.DeepEqual(tt.nicPort, tt.wantedNicPort) {
 				t.Errorf("collectNetworkPortInfo() gotNicPort = %v, want %v", tt.nicPort, tt.wantedNicPort)
 			}
@@ -119,11 +118,11 @@ func TestInventoryCollectEthernetInfo(t *testing.T) {
 	testNicPort := &common.NICPort{
 		ID: testNicPortID,
 	}
-	testUnmatchingEthList := []*redfish.EthernetInterface{
+	testUnmatchingEthList := []*common2.EthernetInterface{
 		{Entity: common2.Entity{ID: "other ID"}},
 		{Entity: common2.Entity{ID: "another one"}},
 	}
-	testMatchingEth := &redfish.EthernetInterface{
+	testMatchingEth := &common2.EthernetInterface{
 		Entity:      common2.Entity{ID: testEthernetID},
 		Description: "Ethernet Interface",
 		Status: common2.Status{
@@ -155,12 +154,12 @@ func TestInventoryCollectEthernetInfo(t *testing.T) {
 	tests := []struct {
 		name               string
 		nicPort            *common.NICPort
-		ethernetInterfaces []*redfish.EthernetInterface
+		ethernetInterfaces []*common2.EthernetInterface
 		wantedNicPort      *common.NICPort
 	}{
 		{name: "nil"},
 		{name: "empty", nicPort: testNicPort, wantedNicPort: testNicPort},
-		{name: "empty ethernet list", nicPort: testNicPort, ethernetInterfaces: []*redfish.EthernetInterface{}, wantedNicPort: testNicPort},
+		{name: "empty ethernet list", nicPort: testNicPort, ethernetInterfaces: []*common2.EthernetInterface{}, wantedNicPort: testNicPort},
 		{name: "unmatching ethernet list", nicPort: testNicPort, ethernetInterfaces: testUnmatchingEthList, wantedNicPort: testNicPort},
 		{
 			name:               "full",
